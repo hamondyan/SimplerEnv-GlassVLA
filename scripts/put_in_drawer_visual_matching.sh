@@ -26,7 +26,7 @@ EvalOverlay() {
 # A0
 CUDA_VISIBLE_DEVICES=${gpu_id} python simpler_env/main_inference.py --policy-model ${policy_model} --ckpt-path ${ckpt_path} --action-ensemble-temp ${action_ensemble_temp} --logging-dir ${logging_dir} \
   --robot google_robot_static \
-  --control-freq 3 --sim-freq 513 --max-episode-steps 200 \
+  --control-freq 3 --sim-freq 513 --max-episode-steps 113 \
   --env-name ${env_name} --scene-name dummy_drawer \
   --robot-init-x 0.644 0.644 1 --robot-init-y -0.179 -0.179 1 \
   --robot-init-rot-quat-center 0 0 0 1 --robot-init-rot-rpy-range 0 0 1 0 0 1 -0.03 -0.03 1 \
@@ -37,7 +37,7 @@ echo "Done A0"
 # B0
 CUDA_VISIBLE_DEVICES=${gpu_id} python simpler_env/main_inference.py --policy-model ${policy_model} --ckpt-path ${ckpt_path} --action-ensemble-temp ${action_ensemble_temp} --logging-dir ${logging_dir} \
   --robot google_robot_static \
-  --control-freq 3 --sim-freq 513 --max-episode-steps 200 \
+  --control-freq 3 --sim-freq 513 --max-episode-steps 113 \
   --env-name ${env_name} --scene-name dummy_drawer \
   --robot-init-x 0.652 0.652 1 --robot-init-y 0.009 0.009 1 \
   --robot-init-rot-quat-center 0 0 0 1 --robot-init-rot-rpy-range 0 0 1 0 0 1 0 0 1 \
@@ -48,7 +48,7 @@ echo "Done B0"
 # C0
 CUDA_VISIBLE_DEVICES=${gpu_id} python simpler_env/main_inference.py --policy-model ${policy_model} --ckpt-path ${ckpt_path} --action-ensemble-temp ${action_ensemble_temp} --logging-dir ${logging_dir} \
   --robot google_robot_static \
-  --control-freq 3 --sim-freq 513 --max-episode-steps 200 \
+  --control-freq 3 --sim-freq 513 --max-episode-steps 113 \
   --env-name ${env_name} --scene-name dummy_drawer \
   --robot-init-x 0.665 0.665 1 --robot-init-y 0.224 0.224 1 \
   --robot-init-rot-quat-center 0 0 0 1 --robot-init-rot-rpy-range 0 0 1 0 0 1 0 0 1 \

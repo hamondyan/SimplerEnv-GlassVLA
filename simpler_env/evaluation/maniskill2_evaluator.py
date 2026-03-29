@@ -3,16 +3,31 @@ Evaluate a model on ManiSkill2 environment.
 """
 
 import os
+import logging
 
 import numpy as np
 from transforms3d.euler import quat2euler
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 from simpler_env.utils.env.env_builder import (
     build_maniskill2_env,
     get_robot_control_mode,
 )
-from simpler_env.utils.env.observation_utils import get_image_from_maniskill2_obs_dict
+from simpler_env.utils.env.observation_utils import (
+    get_image_from_maniskill2_obs_dict,
+    get_env_masks_from_obs,
+)
 from simpler_env.utils.visualization import write_interval_video, write_video
+
+# Import image simplification module
+try:
+    from simpler_env.utils.image_simplification import create_image_simplifier
+    IMAGE_SIMPLIFICATION_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: Image simplification not available: {e}")
+    IMAGE_SIMPLIFICATION_AVAILABLE = False
 
 
 def run_maniskill2_eval_single_episode(
@@ -38,6 +53,8 @@ def run_maniskill2_eval_single_episode(
     enable_raytracing=False,
     additional_env_save_tags=None,
     logging_dir="./results",
+    image_simplifier=None,  # Added: image simplification module
+    enable_simplification=False,  # Added: flag to enable/disable
 ):
     if additional_env_build_kwargs is None:
         additional_env_build_kwargs = {}
@@ -98,6 +115,12 @@ def run_maniskill2_eval_single_episode(
 
     # Initialize logging
     image = get_image_from_maniskill2_obs_dict(env, obs, camera_name=obs_camera_name)
+    
+    # === Image Simplification: Reset for new episode ===
+    # reset() automatically marks for re-detection on next frame
+    if enable_simplification and image_simplifier is not None:
+        image_simplifier.reset()
+    
     images = [image]
     predicted_actions = []
     predicted_terminated, done, truncated = False, False, False
@@ -111,9 +134,59 @@ def run_maniskill2_eval_single_episode(
 
     # Step the environment
     task_descriptions = []
-    while not (predicted_terminated or truncated):
+    # Exit loop if: model predicts termination, episode is truncated (max steps), or task succeeds (and is final subtask for multi-subtask envs)
+    while not (predicted_terminated or truncated or (done and is_final_subtask)):
+        # === Image Simplification: Dual Mask Strategy ===
+        # 1. Get environment-provided masks (reliable: robot arm + manipulation objects)
+        # 2. Get GroundingSAM2 detected masks (semantic detection)
+        # 3. Combine both for complete task-relevant mask
+        task_mask = None
+        robot_mask = None
+        object_mask = None
+        
+        if enable_simplification and image_simplifier is not None:
+            try:
+                # Step 1: Get environment segmentation masks (100% reliable)
+                try:
+                    robot_mask, object_mask = get_env_masks_from_obs(env, obs, camera_name=obs_camera_name)
+                    if robot_mask is not None:
+                        logger.debug(f"[ENV MASK] Robot mask: {np.count_nonzero(robot_mask)}/{robot_mask.size} pixels")
+                    if object_mask is not None:
+                        logger.debug(f"[ENV MASK] Object mask: {np.count_nonzero(object_mask)}/{object_mask.size} pixels")
+                except Exception as e:
+                    logger.warning(f"[ENV MASK] Failed to get environment masks: {e}")
+                    robot_mask, object_mask = None, None
+                
+                # Step 2 & 3: Call ImageSimplifier with environment masks
+                # ImageSimplifier will combine env masks with GroundingSAM2 detected masks
+                logger.info(f"[DEBUG] About to call simplify_frame, frame shape: {image.shape if hasattr(image, 'shape') else 'unknown'}")
+                result = image_simplifier.simplify_frame(
+                    image, 
+                    task_description,
+                    robot_mask=robot_mask,
+                    object_mask=object_mask
+                )
+                if isinstance(result, tuple):
+                    image, task_mask = result
+                    logger.info(f"[DEBUG] simplify_frame returned: image shape={image.shape}, "
+                              f"mask shape={task_mask.shape}, mask dtype={task_mask.dtype}, "
+                              f"mask range=[{task_mask.min()}, {task_mask.max()}], "
+                              f"mask non-zero pixels={np.count_nonzero(task_mask)}/{task_mask.size}")
+                else:
+                    image = result
+                    logger.info(f"[DEBUG] simplify_frame returned single value (no mask)")
+                logger.info(f"[DEBUG] simplify_frame returned successfully")
+            except Exception as e:
+                logger.error(f"[DEBUG] Image simplification failed: {e}")
+                print(f"Warning: Image simplification failed: {e}, using original image")
+        
         # step the model; "raw_action" is raw model action output; "action" is the processed action to be sent into maniskill env
-        raw_action, action = model.step(image, task_description, eef_pos=obs["agent"]["eef_pos"])
+        raw_action, action = model.step(
+            image, 
+            task_description, 
+            task_mask=task_mask,
+            eef_pos=obs["agent"]["eef_pos"]
+        )
         predicted_actions.append(raw_action)
         predicted_terminated = bool(action["terminate_episode"][0] > 0)
         if predicted_terminated:
@@ -134,6 +207,9 @@ def run_maniskill2_eval_single_episode(
         if new_task_description != task_description:
             task_description = new_task_description
             print(task_description)
+            # === Image Simplification: Mark new task for re-detection ===
+            if enable_simplification and image_simplifier is not None:
+                image_simplifier.mark_new_task()
         is_final_subtask = env.is_final_subtask()
 
         print(timestep, info)
@@ -184,6 +260,46 @@ def run_maniskill2_eval_single_episode(
 def maniskill2_evaluator(model, args):
     control_mode = get_robot_control_mode(args.robot, args.policy_model)
     success_arr = []
+    
+    # === Initialize Image Simplifier (once for all episodes) ===
+    image_simplifier = None
+    
+    # Check environment variables first, then args
+    env_var = os.environ.get('ENABLE_IMAGE_SIMPLIFICATION', '0')
+    logger.info(f"[DEBUG] ENABLE_IMAGE_SIMPLIFICATION env var: '{env_var}'")
+    enable_simplification = env_var == '1' or getattr(args, 'enable_image_simplification', False)
+    logger.info(f"[DEBUG] enable_simplification final value: {enable_simplification}")
+    
+    logger.info(f"[DEBUG] IMAGE_SIMPLIFICATION_AVAILABLE: {IMAGE_SIMPLIFICATION_AVAILABLE}")
+    
+    if enable_simplification and IMAGE_SIMPLIFICATION_AVAILABLE:
+        try:
+            # Create visualization directory with env_name to avoid conflicts between different tasks
+            # Each task/environment will have its own subdirectory
+            simplification_save_dir = os.path.join(args.logging_dir, "image_simplification", args.env_name)
+            logger.info(f"[DEBUG] Creating ImageSimplifier with save_dir: {simplification_save_dir}")
+            print(f"Initializing image simplification module...")
+            print(f"Visualization will be saved to: {simplification_save_dir}")
+            
+            # Get blur_sigma from environment or args
+            blur_sigma = float(os.environ.get('IMAGE_SIMPLIFICATION_BLUR_SIGMA', 
+                              str(getattr(args, 'blur_sigma', 10.0))))
+            
+            # Get detection_interval from environment or args
+            detection_interval = int(os.environ.get('IMAGE_SIMPLIFICATION_DETECTION_INTERVAL',
+                                    str(getattr(args, 'detection_interval', 1))))
+          
+            image_simplifier = create_image_simplifier(
+                device="cuda" if args.policy_model else "cuda",
+                save_dir=simplification_save_dir,
+                blur_sigma=blur_sigma,
+                detection_interval=detection_interval
+            )
+            print(f"Image simplification initialized successfully! (blur_sigma={blur_sigma})")
+        except Exception as e:
+            print(f"Warning: Failed to initialize image simplification: {e}")
+            print("Continuing without image simplification...")
+            enable_simplification = False
 
     # run inference
     for robot_init_x in args.robot_init_xs:
@@ -208,6 +324,8 @@ def maniskill2_evaluator(model, args):
                     additional_env_save_tags=args.additional_env_save_tags,
                     obs_camera_name=args.obs_camera_name,
                     logging_dir=args.logging_dir,
+                    image_simplifier=image_simplifier,  # Added
+                    enable_simplification=enable_simplification,  # Added
                 )
                 if args.obj_variation_mode == "xy":
                     for obj_init_x in args.obj_init_xs:

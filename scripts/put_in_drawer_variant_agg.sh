@@ -22,7 +22,7 @@ EvalSim() {
 
   CUDA_VISIBLE_DEVICES=${gpu_id} python simpler_env/main_inference.py --policy-model ${policy_model} --ckpt-path ${ckpt_path} --action-ensemble-temp ${action_ensemble_temp} --logging-dir ${logging_dir} \
     --robot google_robot_static \
-    --control-freq 3 --sim-freq 513 --max-episode-steps 200 \
+    --control-freq 3 --sim-freq 513 --max-episode-steps 113 \
     --env-name ${env_name} --scene-name ${scene_name} \
     --robot-init-x 0.65 0.65 1 --robot-init-y -0.2 0.2 3 \
     --robot-init-rot-quat-center 0 0 0 1 --robot-init-rot-rpy-range 0 0 1 0 0 1 0.0 0.0 1 \

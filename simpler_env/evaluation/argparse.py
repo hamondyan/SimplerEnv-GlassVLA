@@ -112,6 +112,19 @@ def get_args():
     parser.add_argument("--logging-dir", type=str, default="./results")
     parser.add_argument("--tf-memory-limit", type=int, default=3072, help="Tensorflow memory limit")
     parser.add_argument("--octo-init-rng", type=int, default=0, help="Octo init rng seed")
+    
+    # Image simplification arguments
+    parser.add_argument(
+        "--enable-image-simplification", 
+        action="store_true", 
+        help="Enable real-time image simplification using GroundingDINO + SAM2"
+    )
+    parser.add_argument(
+        "--blur-sigma", 
+        type=float, 
+        default=10.0, 
+        help="Gaussian blur sigma for background simplification"
+    )
 
     args = parser.parse_args()
 

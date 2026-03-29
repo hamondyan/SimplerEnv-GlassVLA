@@ -54,6 +54,7 @@ class SpatialVLAInference:
             .eval()
             .cuda()
         )
+        self.device = next(self.vla.parameters()).device
 
         self.image_size = image_size
         self.action_scale = action_scale
@@ -92,7 +93,12 @@ class SpatialVLAInference:
         self.previous_gripper_action = None
 
     def step(
-        self, image: np.ndarray, task_description: Optional[str] = None, *args, **kwargs
+        self, 
+        image: np.ndarray, 
+        task_description: Optional[str] = None, 
+        task_mask: Optional[np.ndarray] = None,
+        *args, 
+        **kwargs
     ) -> tuple[dict[str, np.ndarray], dict[str, np.ndarray]]:
         """
         Input:
@@ -115,9 +121,31 @@ class SpatialVLAInference:
         self._add_image_to_history(image)
         images: List[Image.Image] = self._obtain_image_history()
         prompt = task_description
+        mask_tensor = None
+        if task_mask is not None:
+            # task_mask: (H, W) or (H, W, 1)
+            if task_mask.ndim == 3:
+                task_mask = task_mask.squeeze()
+            task_mask = (task_mask > 0).astype(np.uint8)
+            mask_resized = cv.resize(
+                task_mask,
+                tuple(self.image_size),
+                interpolation=cv.INTER_NEAREST,
+            )
+            mask_tensor = (
+                torch.from_numpy(mask_resized)
+                .float()
+                .unsqueeze(0)
+                .unsqueeze(0)
+                .to(self.device)
+            )
 
         # predict action (7-dof; un-normalize for bridgev2)
         inputs = self.processor(images=images, text=prompt, unnorm_key=self.unnorm_key, return_tensors="pt", do_normalize=False)
+        if mask_tensor is not None:
+            inputs["task_mask"] = mask_tensor
+        else:
+            print(f"[DEBUG] task_mask is None, adaptive blur will not be applied")
         with torch.no_grad():
             if hasattr(self.processor, "action_tokenizer"):
                 generation_outputs = self.vla.predict_action(inputs)
