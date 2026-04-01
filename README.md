@@ -13,6 +13,10 @@ For GlassVLA testing, also complete the following:
 	- [simpler_env/utils/image_simplification.py](simpler_env/utils/image_simplification.py#L770): `sam2_checkpoint` (SAM2 checkpoint `.pt` path)
 	- [simpler_env/utils/image_simplification.py](simpler_env/utils/image_simplification.py#L772): `sam2_config` (SAM2 Hydra config module path)
 
+Clone this repo:
+```
+git clone https://github.com/simpler-env/SimplerEnv --recurse-submodules --depth 1
+```
 Install numpy<2.0 (otherwise errors in IK might occur in pinocchio):
 ```
 pip install numpy==1.24.4
