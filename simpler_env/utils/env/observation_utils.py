@@ -31,7 +31,7 @@ def _get_camera_name(env, camera_name=None):
 def get_env_masks_from_obs(env, obs, camera_name=None):
     """
     Extract robot and target object segmentation masks from ManiSkill2 environment observation.
-    
+    This function is used to test the mask quality from segmentation model.
     This function uses the environment's built-in segmentation to reliably extract:
     - Robot arm mask: pixels belonging to the robot links
     - Object mask: pixels belonging to target manipulation objects

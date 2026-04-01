@@ -291,7 +291,7 @@ def maniskill2_evaluator(model, args):
           
             image_simplifier = create_image_simplifier(
                 device="cuda" if args.policy_model else "cuda",
-                save_dir=simplification_save_dir,
+                save_dir=None,
                 blur_sigma=blur_sigma,
                 detection_interval=detection_interval
             )

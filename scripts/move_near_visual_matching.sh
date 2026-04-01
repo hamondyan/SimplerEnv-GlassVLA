@@ -23,7 +23,7 @@ do for ckpt_path in "${arr[@]}";
 
 do CUDA_VISIBLE_DEVICES=${gpu_id} python simpler_env/main_inference.py --policy-model ${policy_model} --ckpt-path ${ckpt_path} --action-ensemble-temp ${action_ensemble_temp} --logging-dir ${logging_dir} \
   --robot google_robot_static \
-  --control-freq 3 --sim-freq 513 --max-episode-steps 80 \
+  --control-freq 3 --sim-freq 513 --max-episode-steps 160 \
   --env-name ${env_name} --scene-name ${scene_name} \
   --rgb-overlay-path ${rgb_overlay_path} \
   --robot-init-x 0.35 0.35 1 --robot-init-y 0.21 0.21 1 --obj-variation-mode episode --obj-episode-range 0 60 \

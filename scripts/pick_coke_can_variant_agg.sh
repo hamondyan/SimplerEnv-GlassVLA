@@ -23,7 +23,7 @@ do for ckpt_path in "${arr[@]}";
 
 do CUDA_VISIBLE_DEVICES=${gpu_id} python simpler_env/main_inference.py --policy-model ${policy_model} --ckpt-path ${ckpt_path} --action-ensemble-temp ${action_ensemble_temp} --logging-dir ${logging_dir} \
   --robot google_robot_static \
-  --control-freq 3 --sim-freq 513 --max-episode-steps 80 \
+  --control-freq 3 --sim-freq 513 --max-episode-steps 160 \
   --env-name ${env_name} --scene-name ${scene_name} \
   --robot-init-x 0.35 0.35 1 --robot-init-y 0.20 0.20 1 --obj-init-x -0.35 -0.12 5 --obj-init-y -0.02 0.42 5 \
   --robot-init-rot-quat-center 0 0 0 1 --robot-init-rot-rpy-range 0 0 1 0 0 1 0 0 1 \
@@ -51,7 +51,7 @@ do for ckpt_path in "${arr[@]}";
 
 do CUDA_VISIBLE_DEVICES=${gpu_id} python simpler_env/main_inference.py --policy-model ${policy_model} --ckpt-path ${ckpt_path} --action-ensemble-temp ${action_ensemble_temp} --logging-dir ${logging_dir} \
   --robot google_robot_static \
-  --control-freq 3 --sim-freq 513 --max-episode-steps 80 \
+  --control-freq 3 --sim-freq 513 --max-episode-steps 160 \
   --env-name ${env_name} --scene-name ${scene_name} \
   --robot-init-x 0.35 0.35 1 --robot-init-y 0.20 0.20 1 --obj-init-x -0.35 -0.12 5 --obj-init-y -0.02 0.42 5 \
   --robot-init-rot-quat-center 0 0 0 1 --robot-init-rot-rpy-range 0 0 1 0 0 1 0 0 1 \
@@ -77,7 +77,7 @@ do for ckpt_path in "${arr[@]}";
 
 do CUDA_VISIBLE_DEVICES=${gpu_id} python simpler_env/main_inference.py --policy-model ${policy_model} --ckpt-path ${ckpt_path} --action-ensemble-temp ${action_ensemble_temp} --logging-dir ${logging_dir} \
   --robot google_robot_static \
-  --control-freq 3 --sim-freq 513 --max-episode-steps 80 \
+  --control-freq 3 --sim-freq 513 --max-episode-steps 160 \
   --env-name ${env_name} --scene-name ${scene_name} \
   --robot-init-x 0.35 0.35 1 --robot-init-y 0.20 0.20 1 --obj-init-x -0.35 -0.12 5 --obj-init-y -0.02 0.42 5 \
   --robot-init-rot-quat-center 0 0 0 1 --robot-init-rot-rpy-range 0 0 1 0 0 1 0 0 1 \
@@ -85,7 +85,7 @@ do CUDA_VISIBLE_DEVICES=${gpu_id} python simpler_env/main_inference.py --policy-
 
 CUDA_VISIBLE_DEVICES=${gpu_id} python simpler_env/main_inference.py --policy-model ${policy_model} --ckpt-path ${ckpt_path} --action-ensemble-temp ${action_ensemble_temp} --logging-dir ${logging_dir} \
   --robot google_robot_static \
-  --control-freq 3 --sim-freq 513 --max-episode-steps 80 \
+  --control-freq 3 --sim-freq 513 --max-episode-steps 160 \
   --env-name ${env_name} --scene-name ${scene_name} \
   --robot-init-x 0.35 0.35 1 --robot-init-y 0.20 0.20 1 --obj-init-x -0.35 -0.12 5 --obj-init-y -0.02 0.42 5 \
   --robot-init-rot-quat-center 0 0 0 1 --robot-init-rot-rpy-range 0 0 1 0 0 1 0 0 1 \
@@ -112,7 +112,7 @@ do for ckpt_path in "${arr[@]}";
 
 do CUDA_VISIBLE_DEVICES=${gpu_id} python simpler_env/main_inference.py --policy-model ${policy_model} --ckpt-path ${ckpt_path} --action-ensemble-temp ${action_ensemble_temp} --logging-dir ${logging_dir} \
   --robot google_robot_static \
-  --control-freq 3 --sim-freq 513 --max-episode-steps 80 \
+  --control-freq 3 --sim-freq 513 --max-episode-steps 160 \
   --env-name ${env_name} --scene-name ${scene_name} \
   --robot-init-x 0.35 0.35 1 --robot-init-y 0.20 0.20 1 --obj-init-x -0.35 -0.12 5 --obj-init-y -0.02 0.42 5 \
   --robot-init-rot-quat-center 0 0 0 1 --robot-init-rot-rpy-range 0 0 1 0 0 1 0 0 1 \
@@ -137,7 +137,7 @@ do for ckpt_path in "${arr[@]}";
 
 do CUDA_VISIBLE_DEVICES=${gpu_id} python simpler_env/main_inference.py --policy-model ${policy_model} --ckpt-path ${ckpt_path} --action-ensemble-temp ${action_ensemble_temp} --logging-dir ${logging_dir} \
   --robot google_robot_static \
-  --control-freq 3 --sim-freq 513 --max-episode-steps 80 \
+  --control-freq 3 --sim-freq 513 --max-episode-steps 160 \
   --env-name ${env_name} --scene-name ${scene_name} \
   --robot-init-x 0.35 0.35 1 --robot-init-y 0.20 0.20 1 --obj-init-x -0.35 -0.12 5 --obj-init-y -0.02 0.42 5 \
   --robot-init-rot-quat-center 0 0 0 1 --robot-init-rot-rpy-range 0 0 1 0 0 1 0 0 1 \
@@ -145,7 +145,7 @@ do CUDA_VISIBLE_DEVICES=${gpu_id} python simpler_env/main_inference.py --policy-
 
 CUDA_VISIBLE_DEVICES=${gpu_id} python simpler_env/main_inference.py --policy-model ${policy_model} --ckpt-path ${ckpt_path} --action-ensemble-temp ${action_ensemble_temp} --logging-dir ${logging_dir} \
   --robot google_robot_static \
-  --control-freq 3 --sim-freq 513 --max-episode-steps 80 \
+  --control-freq 3 --sim-freq 513 --max-episode-steps 160 \
   --env-name ${env_name} --scene-name ${scene_name} \
   --robot-init-x 0.35 0.35 1 --robot-init-y 0.20 0.20 1 --obj-init-x -0.35 -0.12 5 --obj-init-y -0.02 0.42 5 \
   --robot-init-rot-quat-center 0 0 0 1 --robot-init-rot-rpy-range 0 0 1 0 0 1 0 0 1 \
@@ -172,7 +172,7 @@ do for ckpt_path in "${arr[@]}";
 
 do CUDA_VISIBLE_DEVICES=${gpu_id} python simpler_env/main_inference.py --policy-model ${policy_model} --ckpt-path ${ckpt_path} --action-ensemble-temp ${action_ensemble_temp} --logging-dir ${logging_dir} \
   --robot google_robot_static \
-  --control-freq 3 --sim-freq 513 --max-episode-steps 80 \
+  --control-freq 3 --sim-freq 513 --max-episode-steps 160 \
   --env-name ${env_name} --scene-name ${scene_name} \
   --robot-init-x 0.35 0.35 1 --robot-init-y 0.20 0.20 1 --obj-init-x -0.35 -0.12 5 --obj-init-y -0.02 0.42 5 \
   --robot-init-rot-quat-center 0 0 0 1 --robot-init-rot-rpy-range 0 0 1 0 0 1 0 0 1 \

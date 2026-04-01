@@ -15,7 +15,7 @@ from simpler_env.utils.action.action_ensemble import ActionEnsembler
 class SpatialVLAInference:
     def __init__(
         self,
-        saved_model_path: str = "IPEC-COMMUNITY/spatialvla-4b-224-pt",
+        saved_model_path: str = "glassvla-4b-sam2-text-10k",
         unnorm_key: Optional[str] = None,
         policy_setup: str = "widowx_bridge",
         exec_horizon: int = 1,
